@@ -19,6 +19,15 @@ It bridges the gap between **learning and employability** by giving users clear,
 
 ---
 
+## ✨ Demo Video
+
+
+
+https://github.com/user-attachments/assets/51d7b068-cfb2-4b3c-a379-b4b4d210288b
+
+
+---
+
 ## ✨ Features
 
 ### 👤 Profile Extraction
