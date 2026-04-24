@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PathPilot AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --indigo: #6366f1;
+            --indigo-light: #818cf8;
+            --indigo-dark: #4f46e5;
+            --purple: #8b5cf6;
+            --blue: #3b82f6;
+            --cyan: #22d3ee;
+            --success: #22c55e;
+            --success-light: #4ade80;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-light: #f87171;
+            --pink: #ec4899;
+
+            --bg-primary: #fafbfc;
+            --bg-secondary: #f1f5f9;
+            --bg-tertiary: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --sidebar-bg: #ffffff;
+            --header-bg: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --border-light: #1e293b;
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --sidebar-bg: #1e293b;
+            --header-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: background 0.2s ease, color 0.2s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            background: var(--header-bg);
+            padding: 0 28px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 64px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            position: fixed;
+            top: 64px;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            z-index: 50;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 72px;
+        }
+
+        .sidebar-toggle {
+            width: 100%;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sidebar.collapsed .sidebar-toggle span:not(.sidebar-icon) {
+            display: none;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--indigo);
+            color: white;
+            border-color: var(--indigo);
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar.collapsed .sidebar-section-title {
+            display: none;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+            color: var(--indigo);
+            font-weight: 600;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: var(--indigo);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 18px;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed .sidebar-item span:not(.sidebar-icon) {
+            display: none;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 32px 40px;
+            min-height: calc(100vh - 64px);
+            transition: margin-left 0.25s ease;
+        }
+
+        .sidebar.collapsed ~ .main {
+            margin-left: 72px;
+        }
+
+        /* Section */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .card-title-icon {
+            font-size: 20px;
+        }
+
+        /* Profile Section */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .profile-field:hover {
+            border-color: var(--indigo-light);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .profile-field label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-field .value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .profile-field .value:empty::before {
+            content: "—";
+            color: var(--text-muted);
+        }
+
+        .profile-field a {
+            color: var(--indigo);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .profile-field a:hover {
+            color: var(--indigo-dark);
+            text-decoration: underline;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 32px 0 16px 0;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header:first-of-type {
+            margin-top: 0;
+        }
+
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+            margin-left: 8px;
+        }
+
+        /* Lists */
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list li {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.15s ease;
+        }
+
+        .list li:hover {
+            padding-left: 8px;
+            background: var(--bg-secondary);
+            margin: 0 -12px;
+            padding-left: 20px;
+            border-radius: 8px;
+            border-bottom: none;
+        }
+
+        .list li:last-child {
+            border-bottom: none;
+        }
+
+        .list li strong {
+            font-weight: 600;
+        }
+
+        .list li small {
+            color: var(--text-secondary);
+            font-size: 13px;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Skills */
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .skill-tag:hover {
+            background: var(--indigo);
+            color: white;
+            border-color: var(--indigo);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .skill-tag.missing {
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .skill-tag.missing:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+
+        .skill-tag.high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .skill-tag.high:hover {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .skill-tag.medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        .skill-tag.medium:hover {
+            background: #d97706;
+            color: white;
+            border-color: #d97706;
+        }
+
+        .skill-tag.low {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border-color: rgba(34, 197, 94, 0.25);
+        }
+
+        .skill-tag.low:hover {
+            background: #16a34a;
+            color: white;
+            border-color: #16a34a;
+        }
+
+        .skill-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.15s ease;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .skill-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--text-primary);
+        }
+
+        .skill-tag:hover .skill-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Match Score */
+        .match-score-container {
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        .match-score-value {
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .match-score-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+            border-radius: 10px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.06) 100%);
+            color: #16a34a;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        [data-theme="dark"] .role-badge {
+            color: #4ade80;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin: 24px 0;
+        }
+
+        /* Filters */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--indigo);
+            color: white;
+            border-color: var(--indigo);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Job Cards */
+        .job-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--indigo-light);
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .job-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .job-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .job-card-meta strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .save-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .save-btn:hover {
+            background: #fef3c7;
+            color: #d97706;
+            border-color: #fbbf24;
+            transform: scale(1.08);
+        }
+
+        .save-btn.saved {
+            background: #fef3c7;
+            color: #d97706;
+            border-color: #fbbf24;
+        }
+
+        .match-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: help;
+            position: relative;
+        }
+
+        .match-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 400;
+            width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.15s ease;
+            z-index: 100;
+            box-shadow: var(--shadow-xl);
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .match-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--text-primary);
+        }
+
+        .match-score:hover .match-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .apply-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px 24px;
+            background: var(--indigo);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .apply-btn:hover {
+            background: var(--indigo-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        /* Roadmap */
+        .roadmap-progress {
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .progress-percent {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--indigo);
+        }
+
+        .roadmap-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .roadmap-step {
+            padding: 24px;
+            border-radius: 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--indigo);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .roadmap-step:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--indigo-light);
+            border-left-color: var(--indigo);
+        }
+
+        .roadmap-step.completed {
+            border-left-color: var(--success);
+            opacity: 0.75;
+        }
+
+        .roadmap-step.completed:hover {
+            border-left-color: var(--success);
+        }
+
+        .roadmap-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .roadmap-step h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .step-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .complete-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            color: transparent;
+        }
+
+        .complete-checkbox:hover {
+            border-color: var(--indigo);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .complete-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .resource-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .resource-type.docs {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--blue);
+        }
+
+        .resource-type.video {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+        }
+
+        .resource-type.course {
+            background: rgba(139, 92, 246, 0.12);
+            color: var(--purple);
+        }
+
+        .roadmap-step ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .roadmap-step li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        .roadmap-step li:hover {
+            padding: 0;
+            background: none;
+            margin: 0;
+        }
+
+        .roadmap-step a {
+            color: var(--indigo);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+            flex: 1;
+        }
+
+        .roadmap-step a:hover {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--indigo-dark);
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Priority Cards */
+        .priority-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .priority-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+        }
+
+        .priority-card.high {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .priority-card.medium {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-card.low {
+            background: rgba(34, 197, 94, 0.08);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .priority-card-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .priority-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .priority-card.high .priority-card-title { color: #dc2626; }
+        .priority-card.medium .priority-card-title { color: #d97706; }
+        .priority-card.low .priority-card-title { color: #16a34a; }
+
+        .priority-card-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Pro Tip */
+        .pro-tip {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .pro-tip-content {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .pro-tip-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .pro-tip-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .pro-tip-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Analysis Grid */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 28px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                display: flex;
+                flex-wrap: wrap;
+                padding: 12px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .sidebar-item {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+                margin-bottom: 0;
+                margin-right: 8px;
+            }
+
+            .sidebar-item span:not(.sidebar-icon) {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .match-score-value {
+                font-size: 48px;
+            }
+
+            .chart-container {
+                height: 260px;
+            }
+
+            .filters-bar {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Animation utilities */
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo">🚀</div>
+            <h1>PathPilot AI</h1>
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+                🌙
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <span class="sidebar-icon">☰</span>
+                <span>Collapse</span>
+            </button>
+
+            <div class="sidebar-section">
+                <div class="sidebar-item active" data-section="profile">
+                    <span class="sidebar-icon">👤</span>
+                    <span>Profile</span>
+                </div>
+                <div class="sidebar-item" data-section="analysis">
+                    <span class="sidebar-icon">📈</span>
+                    <span>Analysis</span>
+                </div>
+                <div class="sidebar-item" data-section="opportunities">
+                    <span class="sidebar-icon">💼</span>
+                    <span>Opportunities</span>
+                </div>
+                <div class="sidebar-item" data-section="skillgap">
+                    <span class="sidebar-icon">🎯</span>
+                    <span>Skill Gap</span>
+                </div>
+                <div class="sidebar-item" data-section="roadmap">
+                    <span class="sidebar-icon">🗺️</span>
+                    <span>Roadmap</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+
+            <!-- 🔥 PROFILE SECTION -->
+            <div id="section-profile" class="section active">
+                <div class="page-header">
+                    <h1 class="page-title">Profile Overview</h1>
+                    <p class="page-subtitle">Your resume data and career information at a glance</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-title-icon">👤</span>
+                            Personal Information
+                        </h2>
+                    </div>
+
+                    <div class="profile-grid">
+                        <div class="profile-field">
+                            <label><span>👤</span> Name</label>
+                            <div class="value"><pre>{{ name|default:"-" }}</pre></div>
+                        </div>
+
+                        <div class="profile-field">
+                            <label><span>📱</span> Phone</label>
+                            <div class="value"><pre>{{ phone|default:"-" }}</pre></div>
+                        </div>
+
+                        <div class="profile-field">
+                            <label><span>📧</span> Email</label>
+                            <div class="value">{{ email|default:"-" }}</div>
+                        </div>
+
+                        <div class="profile-field">
+                            <label><span>🔗</span> LinkedIn</label>
+                            <div class="value">
+                                {% if linkedin %}
+                                    <a href="https://{{ linkedin }}" target="_blank">{{ linkedin }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="profile-field">
+                            <label><span>💻</span> GitHub</label>
+                            <div class="value">
+                                {% if github %}
+                                    <a href="https://{{ github }}" target="_blank">{{ github }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-header">🎓 Education</h3>
+                    <ul class="list">
+                        {% for edu in education %}
+                            <li>
+                                <strong>{{ edu.institution|default:"-" }}</strong>
+                                <small>{{ edu.degree|default:"-" }}{% if edu.duration %} ({{ edu.duration }}){% endif %}{% if edu.cgpa %} • CGPA: {{ edu.cgpa }}{% endif %}</small>
+                            </li>
+                        {% empty %}
+                            <li>No education data available</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3 class="section-header">⚡ Skills</h3>
+                    <div class="skills-list" id="profile-skills">
+                        {% for skill in skills %}
+                            <span class="skill-tag" data-skill="{{ skill|escapejs }}" onclick="findSkillInRoadmap('{{ skill|escapejs }}')">
+                                {{ skill }}
+                                <span class="skill-tooltip">Click to find learning resources</span>
+                            </span>
+                        {% empty %}
+                            <span style="color: var(--text-muted); font-style: italic;">No skills found</span>
+                        {% endfor %}
+                    </div>
+
+                    <h3 class="section-header">🚀 Projects</h3>
+                    <ul class="list">
+                        {% for proj in projects %}
+                            <li>
+                                <strong>{{ proj.name|default:"-" }}</strong>
+                                <small>{{ proj.description|default:"No description available" }}</small>
+                            </li>
+                        {% empty %}
+                            <li>No projects available</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3 class="section-header">🏆 Achievements</h3>
+                    <ul class="list">
+                        {% for ach in achievements %}
+                            <li>{{ ach }}</li>
+                        {% empty %}
+                            <li>No achievements listed</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3 class="section-header">📜 Certifications</h3>
+                    <ul class="list">
+                        {% for cert in certifications %}
+                            <li>{{ cert }}</li>
+                        {% empty %}
+                            <li>No certifications found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 🔥 ANALYSIS SECTION -->
+            <div id="section-analysis" class="section">
+                <div class="page-header">
+                    <h1 class="page-title">Career Analysis</h1>
+                    <p class="page-subtitle">Insights into your profile versus target role requirements</p>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">🎯</span>
+                                Target Role
+                            </h2>
+                        </div>
+                        <div class="role-badge">
+                            {{ role|default:"Not available" }}
+                        </div>
+
+                        <hr>
+
+                        <h2 class="card-title" style="margin-bottom: 20px;">
+                            <span class="card-title-icon">📊</span>
+                            Match Score
+                        </h2>
+                        <div class="match-score-container">
+                            <div class="match-score-value" id="match-score-value">0%</div>
+                            <div class="match-score-label">Profile Match</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="match-progress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span>Beginner</span>
+                                <span>Intermediate</span>
+                                <span>Expert</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">❌</span>
+                                Missing Skills
+                            </h2>
+                        </div>
+                        {% if missing_skills %}
+                            <div class="skills-list">
+                                {% for skill in missing_skills %}
+                                    <span class="skill-tag missing" data-skill="{{ skill|escapejs }}" onclick="findSkillInRoadmap('{{ skill|escapejs }}')">
+                                        {{ skill }}
+                                        <span class="skill-tooltip">Click to view learning path</span>
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🎉</div>
+                                <h4>All Skills Match!</h4>
+                                <p>Your profile aligns perfectly with the target role.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">🕸️</span>
+                                Skills Radar
+                            </h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="skillsRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🔥 OPPORTUNITIES SECTION -->
+            <div id="section-opportunities" class="section">
+                <div class="page-header">
+                    <h1 class="page-title">Job Opportunities</h1>
+                    <p class="page-subtitle">Matching roles based on your skills and experience</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-title-icon">💼</span>
+                            Available Positions
+                        </h2>
+                    </div>
+
+                    <div class="filters-bar">
+                        <button class="filter-btn active" data-filter="all">All Jobs</button>
+                        <button class="filter-btn" data-filter="internship">Internship</button>
+                        <button class="filter-btn" data-filter="fulltime">Full-time</button>
+                        <button class="filter-btn" data-filter="remote">Remote</button>
+                        <button class="filter-btn" data-filter="onsite">On-site</button>
+                    </div>
+
+                    <div id="jobs-container">
+                        {% if opportunities %}
+                            {% for job in opportunities %}
+                                <div class="job-card" data-type="{{ job.type|default:'fulltime' }}" data-mode="{{ job.mode|default:'onsite' }}">
+                                    <div class="job-card-header">
+                                        <h3>{{ job.title }}</h3>
+                                        <button class="save-btn" onclick="toggleSaveJob(this, '{{ job.title|escapejs }}')" title="Save Job">
+                                            ⭐
+                                        </button>
+                                    </div>
+
+                                    <div class="job-card-meta">
+                                        <span><strong>Company:</strong> {{ job.company }}</span>
+                                        <span class="match-score">
+                                            {{ job.match_score }}%
+                                            <span class="match-tooltip">
+                                                You match {{ job.match_score }}% because you know
+                                                {% for skill in job.matched_skills|default:skills|slice:":3" %}
+                                                    {{ skill }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}.
+                                                {% if job.missing_count %}
+                                                    Missing: {{ job.missing_count }} skills
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <p style="margin-bottom: 12px;"><strong>Required Skills:</strong></p>
+                                    <div class="skills-list">
+                                        {% for skill in job.required_skills %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+
+                                    <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">
+                                        Apply Now <span>→</span>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔍</div>
+                                <h4>No Opportunities Yet</h4>
+                                <p>Upload your resume to see matching job opportunities.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🔥 SKILL GAP SECTION -->
+            <div id="section-skillgap" class="section">
+                <div class="page-header">
+                    <h1 class="page-title">Skill Gap Analysis</h1>
+                    <p class="page-subtitle">Identify and prioritize skills to develop for your target role</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-title-icon">🧠</span>
+                            Skills to Develop
+                        </h2>
+                    </div>
+
+                    {% if skill_gap %}
+                        <div class="skills-list">
+                            {% for item in skill_gap %}
+                                <span class="skill-tag {{ item.priority|lower }}"
+                                      data-skill="{{ item.skill|escapejs }}"
+                                      onclick="findSkillInRoadmap('{{ item.skill|escapejs }}')">
+                                    {{ item.skill }}
+                                    <span class="skill-tooltip">
+                                        {{ item.priority }} Priority: Critical for {{ role|default:"your target role" }}
+                                    </span>
+                                </span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="priority-cards">
+                            <div class="priority-card high">
+                                <div class="priority-card-icon">🔴</div>
+                                <div class="priority-card-title">High Priority</div>
+                                <div class="priority-card-desc">Critical skills to learn first</div>
+                            </div>
+
+                            <div class="priority-card medium">
+                                <div class="priority-card-icon">🟡</div>
+                                <div class="priority-card-title">Medium Priority</div>
+                                <div class="priority-card-desc">Important for growth</div>
+                            </div>
+
+                            <div class="priority-card low">
+                                <div class="priority-card-icon">🟢</div>
+                                <div class="priority-card-title">Low Priority</div>
+                                <div class="priority-card-desc">Nice to have skills</div>
+                            </div>
+                        </div>
+
+                        <div class="pro-tip">
+                            <div class="pro-tip-content">
+                                <span class="pro-tip-icon">💡</span>
+                                <div class="pro-tip-text">
+                                    <strong>Pro Tip:</strong> Focus on <strong style="color: #dc2626;">High Priority</strong> skills first to maximize your career growth potential.
+                                    Click any skill above to jump to its learning resources in the Roadmap.
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎉</div>
+                            <h4>No Skill Gaps!</h4>
+                            <p>Your profile is well-rounded and ready for your target role.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 🔥 ROADMAP SECTION -->
+            <div id="section-roadmap" class="section">
+                <div class="page-header">
+                    <h1 class="page-title">Learning Roadmap</h1>
+                    <p class="page-subtitle">Your personalized path to mastering required skills</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-title-icon">🗺️</span>
+                            Your Learning Path
+                        </h2>
+                    </div>
+
+                    <div class="roadmap-progress">
+                        <div class="progress-header">
+                            <span class="progress-title">📈 Overall Progress</span>
+                            <span class="progress-percent" id="roadmap-progress-text">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="roadmap-progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    {% if roadmap %}
+                        <div class="roadmap-container" id="roadmap-steps">
+                            {% for item in roadmap %}
+                                <div class="roadmap-step" data-step="{{ forloop.counter }}" data-skills="{{ item.skills|join:','|default:'' }}">
+                                    <div class="roadmap-step-header">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div class="complete-checkbox" onclick="toggleStepComplete(this, {{ forloop.counter }})">
+                                                ✓
+                                            </div>
+                                            <h4>{{ item.step }}</h4>
+                                        </div>
+                                        <div class="step-time">
+                                            ⏱ {{ item.duration|default:"4-6 hours" }}
+                                        </div>
+                                    </div>
+
+                                    <ul>
+                                        {% for resource in item.resources %}
+                                            <li>
+                                                <span class="resource-type {{ resource.type|default:'docs' }}">
+                                                    {% if resource.type == 'video' %}🎥 Video
+                                                    {% elif resource.type == 'course' %}📚 Course
+                                                    {% else %}📄 Docs
+                                                    {% endif %}
+                                                </span>
+                                                <a href="{{ resource.url|default:resource }}" target="_blank">
+                                                    {{ resource.title|default:resource }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🗺️</div>
+                            <h4>No Roadmap Generated</h4>
+                            <p>Upload your resume to get a personalized learning path.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ===== THEME TOGGLE =====
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('pathpilot-theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('pathpilot-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+
+            // Re-render chart with new theme colors
+            if (window.skillsChart) {
+                updateChartTheme(newTheme);
+            }
+        });
+
+        // ===== SIDEBAR TOGGLE =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('pathpilot-sidebar', sidebar.classList.contains('collapsed'));
+        }
+
+        // Restore sidebar state
+        if (localStorage.getItem('pathpilot-sidebar') === 'true') {
+            document.getElementById('sidebar').classList.add('collapsed');
+        }
+
+        // ===== SECTION NAVIGATION =====
+        function showSection(sectionName, clickedElement) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById('section-' + sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+
+                // Initialize chart when analysis section is shown
+                if (sectionName === 'analysis' && !window.skillsChart) {
+                    setTimeout(initSkillsChart, 100);
+                }
+            }
+
+            // Update sidebar active state
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Handle clicked element
+            if (clickedElement) {
+                const sidebarItem = clickedElement.closest('.sidebar-item');
+                if (sidebarItem) {
+                    sidebarItem.classList.add('active');
+                }
+            }
+
+            // Save active section
+            localStorage.setItem('pathpilot-active-section', sectionName);
+        }
+
+        // Attach click handlers to sidebar items after DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const sectionName = this.getAttribute('data-section');
+                    if (sectionName) {
+                        showSection(sectionName, this);
+                    }
+                });
+            });
+        });
+
+        // Restore active section
+        const savedSection = localStorage.getItem('pathpilot-active-section');
+        if (savedSection) {
+            const sectionElement = document.getElementById('section-' + savedSection);
+            if (sectionElement) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+                sectionElement.classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    if (item.getAttribute('data-section') === savedSection) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // ===== ANIMATED PROGRESS BAR =====
+        function animateMatchScore() {
+            const scoreElement = document.getElementById('match-score-value');
+            const progressBar = document.getElementById('match-progress');
+            const targetScore = {{ score|default:0 }};
+
+            if (scoreElement && progressBar) {
+                let currentScore = 0;
+                const increment = targetScore / 60;
+
+                const animate = () => {
+                    currentScore += increment;
+                    if (currentScore >= targetScore) {
+                        currentScore = targetScore;
+                        scoreElement.textContent = Math.round(currentScore) + '%';
+                        progressBar.style.width = currentScore + '%';
+                        return;
+                    }
+                    scoreElement.textContent = Math.round(currentScore) + '%';
+                    progressBar.style.width = currentScore + '%';
+                    requestAnimationFrame(animate);
+                };
+
+                setTimeout(animate, 300);
+            }
+        }
+
+        // Start animation when analysis section becomes visible
+        let scoreAnimated = false;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !scoreAnimated) {
+                    scoreAnimated = true;
+                    animateMatchScore();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        const analysisSection = document.getElementById('section-analysis');
+        if (analysisSection) {
+            observer.observe(analysisSection);
+
+            if (analysisSection.classList.contains('active')) {
+                setTimeout(() => {
+                    if (!scoreAnimated) {
+                        scoreAnimated = true;
+                        animateMatchScore();
+                    }
+                }, 500);
+            }
+        }
+
+        // ===== SKILLS RADAR CHART =====
+        window.skillsChart = null;
+
+        function initSkillsChart() {
+            const ctx = document.getElementById('skillsRadarChart');
+            if (!ctx || !document.body.contains(ctx)) return;
+
+            if (window.skillsChart) {
+                window.skillsChart.destroy();
+                window.skillsChart = null;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            const currentSkills = {{ skills|default:"[]"|safe }};
+            const missingSkills = {{ missing_skills|default:"[]"|safe }};
+            const allSkills = [...currentSkills, ...missingSkills].slice(0, 8);
+
+            if (allSkills.length === 0) {
+                allSkills.push('No skills data');
+            }
+
+            const currentData = allSkills.map(s => currentSkills.includes(s) ? Math.floor(Math.random() * 30) + 70 : Math.floor(Math.random() * 30) + 40);
+            const targetData = allSkills.map(() => Math.floor(Math.random() * 20) + 80);
+
+            window.skillsChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: allSkills,
+                    datasets: [{
+                        label: 'Your Skills',
+                        data: currentData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: '#6366f1',
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#6366f1',
+                        borderWidth: 2
+                    }, {
+                        label: 'Target Role',
+                        data: targetData,
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderColor: '#22c55e',
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#fff',
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                padding: 20,
+                                font: { size: 12, family: 'Inter' }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: gridColor },
+                            angleLines: { color: gridColor },
+                            pointLabels: {
+                                color: textColor,
+                                font: { size: 11, family: 'Inter' }
+                            },
+                            ticks: {
+                                display: false,
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartTheme(theme) {
+            if (!window.skillsChart) return;
+            const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)';
+            const textColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+
+            window.skillsChart.options.scales.r.grid.color = gridColor;
+            window.skillsChart.options.scales.r.angleLines.color = gridColor;
+            window.skillsChart.options.scales.r.pointLabels.color = textColor;
+            window.skillsChart.options.plugins.legend.labels.color = textColor;
+            window.skillsChart.update();
+        }
+
+        // ===== SKILL → ROADMAP NAVIGATION =====
+        function findSkillInRoadmap(skillName) {
+            if (!skillName) return;
+
+            // Switch to roadmap section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-roadmap').classList.add('active');
+
+            document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                if (item.textContent.includes('Roadmap')) item.classList.add('active');
+            });
+
+            localStorage.setItem('pathpilot-active-section', 'roadmap');
+
+            // Find and highlight the step containing this skill
+            setTimeout(() => {
+                const steps = document.querySelectorAll('.roadmap-step');
+                const searchName = skillName.toLowerCase().trim();
+
+                steps.forEach(step => {
+                    const skills = step.getAttribute('data-skills');
+                    if (skills && skills.toLowerCase().includes(searchName)) {
+                        step.style.borderColor = '#6366f1';
+                        step.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.3)';
+                        step.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        setTimeout(() => {
+                            step.style.borderColor = '';
+                            step.style.boxShadow = '';
+                        }, 3000);
+                    }
+                });
+            }, 100);
+        }
+
+        // ===== ROADMAP PROGRESS TRACKING =====
+        function toggleStepComplete(checkbox, stepId) {
+            checkbox.classList.toggle('checked');
+            const step = checkbox.closest('.roadmap-step');
+            step.classList.toggle('completed', checkbox.classList.contains('checked'));
+
+            const completedSteps = JSON.parse(localStorage.getItem('pathpilot-completed-steps') || '[]');
+            if (checkbox.classList.contains('checked')) {
+                completedSteps.push(stepId);
+            } else {
+                const index = completedSteps.indexOf(stepId);
+                if (index > -1) completedSteps.splice(index, 1);
+            }
+            localStorage.setItem('pathpilot-completed-steps', JSON.stringify(completedSteps));
+
+            updateRoadmapProgress();
+        }
+
+        function updateRoadmapProgress() {
+            const steps = document.querySelectorAll('.roadmap-step');
+            const completedSteps = document.querySelectorAll('.roadmap-step.completed');
+            const progress = steps.length > 0 ? Math.round((completedSteps.length / steps.length) * 100) : 0;
+
+            document.getElementById('roadmap-progress-bar').style.width = progress + '%';
+            document.getElementById('roadmap-progress-text').textContent = progress + '%';
+        }
+
+        // Restore completed steps
+        const completedSteps = JSON.parse(localStorage.getItem('pathpilot-completed-steps') || '[]');
+        completedSteps.forEach(stepId => {
+            const step = document.querySelector('.roadmap-step[data-step="' + stepId + '"]');
+            if (step) {
+                const checkbox = step.querySelector('.complete-checkbox');
+                if (checkbox) {
+                    checkbox.classList.add('checked');
+                    step.classList.add('completed');
+                }
+            }
+        });
+        updateRoadmapProgress();
+
+        // ===== JOB FILTERS =====
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter');
+                const jobs = document.querySelectorAll('.job-card');
+
+                jobs.forEach(job => {
+                    if (filter === 'all') {
+                        job.style.display = 'block';
+                        setTimeout(() => job.style.opacity = '1', 50);
+                    } else {
+                        const type = job.getAttribute('data-type');
+                        const mode = job.getAttribute('data-mode');
+                        if (type === filter || mode === filter) {
+                            job.style.display = 'block';
+                            setTimeout(() => job.style.opacity = '1', 50);
+                        } else {
+                            job.style.opacity = '0';
+                            setTimeout(() => job.style.display = 'none', 200);
+                        }
+                    }
+                });
+            });
+        });
+
+        // ===== SAVE JOBS =====
+        function toggleSaveJob(btn, jobTitle) {
+            btn.classList.toggle('saved');
+            const savedJobs = JSON.parse(localStorage.getItem('pathpilot-saved-jobs') || '[]');
+
+            if (btn.classList.contains('saved')) {
+                savedJobs.push(jobTitle);
+            } else {
+                const index = savedJobs.indexOf(jobTitle);
+                if (index > -1) savedJobs.splice(index, 1);
+            }
+
+            localStorage.setItem('pathpilot-saved-jobs', JSON.stringify(savedJobs));
+        }
+
+        // Restore saved jobs
+        const savedJobs = JSON.parse(localStorage.getItem('pathpilot-saved-jobs') || '[]');
+        document.querySelectorAll('.job-card').forEach(card => {
+            const title = card.querySelector('h3')?.textContent;
+            if (title && savedJobs.includes(title)) {
+                const btn = card.querySelector('.save-btn');
+                if (btn) btn.classList.add('saved');
+            }
+        });
+    </script>
+</body>
+</html>
