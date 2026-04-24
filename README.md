@@ -120,7 +120,7 @@ Webhook → File Processing → AI (Ollama) → Data Formatting → Response
 - Django (Python)  
 
 ### AI / LLM
-- Ollama (local models like `phi3`, `llama3`)  
+- Ollama (local models like `phi3`, `llama3` or cloud models)  
 
 ### Automation
 - n8n (workflow orchestration)  
@@ -129,11 +129,23 @@ Webhook → File Processing → AI (Ollama) → Data Formatting → Response
 
 ## 📸 Screenshots
 
-> Add screenshots here:
-
 - Landing Page  
+<img width="1646" height="1673" alt="Screenshot 2026-04-24 at 22-47-47 PathPilot AI — Engineering Your Future" src="https://github.com/user-attachments/assets/661484c7-9c8d-439a-95f7-c3e87d524ab3" />
+
 - Dashboard (Profile / Analysis / Roadmap / Opportunities)  
-- n8n Workflow  
+<img width="1745" height="1292" alt="Screenshot 2026-04-24 at 22-43-49 Dashboard - PathPilot AI" src="https://github.com/user-attachments/assets/99e5b001-8225-4f60-a702-e6081b3058ac" />
+
+<img width="1752" height="1064" alt="FireShot Capture 077 - Dashboard - PathPilot AI - 127 0 0 1" src="https://github.com/user-attachments/assets/a12a2b71-c6e6-4f0d-acd3-87ce8ff612d6" />
+
+<img width="1752" height="1064" alt="FireShot Capture 078 - Dashboard - PathPilot AI - 127 0 0 1" src="https://github.com/user-attachments/assets/c05a8ba0-e6fc-407d-ace1-5d4a6c3df661" />
+
+<img width="1752" height="1064" alt="FireShot Capture 079 - Dashboard - PathPilot AI - 127 0 0 1" src="https://github.com/user-attachments/assets/8e630acb-bac0-49cb-a852-250554109aec" />
+
+<img width="1752" height="1064" alt="FireShot Capture 081 - Dashboard - PathPilot AI - 127 0 0 1" src="https://github.com/user-attachments/assets/845e3b21-fae1-4b8d-bd0a-6b370d11012c" />
+
+- n8n Workflow
+
+<img width="1751" height="1063" alt="Screenshot 2026-04-24 at 22-51-34 🔄 AI Career Guidance System - n8n" src="https://github.com/user-attachments/assets/625ec901-d895-440c-8c43-c3715919ca5d" />
 
 ---
 
